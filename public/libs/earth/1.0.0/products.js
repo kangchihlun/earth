@@ -232,6 +232,89 @@ var products = function() {
             }
         },
 
+        "turbulence": {
+            matches: _.matches({param: "wind", overlayType: "turbulence"}),
+            create: function(attr) {
+                // Mock turbulence data points
+                var mockData = [
+                    {id: "1", observationTime: "2025-04-02T09:18:15Z", latitude: 25.17, longitude: 122.2, altitude: 28269, edrMean: 0.35},
+                    {id: "2", observationTime: "2025-04-02T09:18:15Z", latitude: 35.17, longitude: 132.2, altitude: 28269, edrMean: 0.15},
+                    {id: "3", observationTime: "2025-04-02T09:18:15Z", latitude: 45.17, longitude: 142.2, altitude: 28269, edrMean: 0.65},
+                    {id: "4", observationTime: "2025-04-02T09:18:15Z", latitude: 55.17, longitude: 152.2, altitude: 28269, edrMean: 0.95},
+                    {id: "5", observationTime: "2025-04-02T09:18:15Z", latitude: 15.17, longitude: 112.2, altitude: 28269, edrMean: 0.25},
+                    {id: "6", observationTime: "2025-04-02T09:18:15Z", latitude: 5.17, longitude: 102.2, altitude: 28269, edrMean: 0.45},
+                    {id: "7", observationTime: "2025-04-02T09:18:15Z", latitude: -5.17, longitude: 92.2, altitude: 28269, edrMean: 0.75},
+                    {id: "8", observationTime: "2025-04-02T09:18:15Z", latitude: -15.17, longitude: 82.2, altitude: 28269, edrMean: 0.85}
+                ];
+
+                return buildProduct({
+                    field: "scalar",
+                    type: "turbulence",
+                    description: localize({
+                        name: {en: "Turbulence", ja: "乱気流"},
+                        qualifier: {en: " @ " + describeSurface(attr), ja: " @ " + describeSurfaceJa(attr)}
+                    }),
+                    paths: [], // No paths needed for mock data
+                    date: gfsDate(attr),
+                    builder: function() {
+                        return {
+                            header: {
+                                lo1: 0,
+                                la1: 90,
+                                dx: 1,
+                                dy: 1,
+                                nx: 360,
+                                ny: 181,
+                                refTime: new Date().toISOString(),
+                                forecastTime: 0,
+                                centerName: "Mock Turbulence Data"
+                            },
+                            interpolate: function(λ, φ) {
+                                // Find the closest mock data point
+                                var closest = null;
+                                var minDist = Infinity;
+                                
+                                mockData.forEach(function(point) {
+                                    var dist = Math.sqrt(
+                                        Math.pow(point.longitude - λ, 2) + 
+                                        Math.pow(point.latitude - φ, 2)
+                                    );
+                                    if (dist < minDist) {
+                                        minDist = dist;
+                                        closest = point;
+                                    }
+                                });
+                                
+                                // Return null if too far from any point
+                                if (minDist > 5) return null;
+                                
+                                return closest.edrMean;
+                            },
+                            data: function() {
+                                return mockData;
+                            }
+                        };
+                    },
+                    units: [
+                        {label: "EDR", conversion: function(x) { return x; }, precision: 2}
+                    ],
+                    scale: {
+                        bounds: [0, 1.0],
+                        gradient: function(v, a) {
+                            var segments = [
+                                [0.0, [0, 255, 0]],      // Green for calm (0-0.3)
+                                [0.3, [255, 255, 0]],   // Yellow for moderate (0.3-0.6)
+                                [0.6, [255, 165, 0]],   // Orange for severe (0.6-0.9)
+                                [0.9, [255, 0, 0]]      // Red for extreme (0.9+)
+                            ];
+                            var scale = µ.segmentedColorScale(segments);
+                            return scale(Math.min(v, 1.0), a);
+                        }
+                    }
+                });
+            }
+        },
+
         "air_density": {
             matches: _.matches({param: "wind", overlayType: "air_density"}),
             create: function(attr) {
@@ -407,7 +490,7 @@ var products = function() {
                     field: "scalar",
                     type: "mean_sea_level_pressure",
                     description: localize({
-                        name: {en: "Mean Sea Level Pressure", ja: "海面更正気圧"},
+                        name: {en: "Mean Sea Level Pressure", ja: "海面更正氣圧"},
                         qualifier: ""
                     }),
                     paths: [gfs1p0degPath(attr, "mean_sea_level_pressure")],

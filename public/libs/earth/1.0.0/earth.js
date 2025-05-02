@@ -19,9 +19,9 @@
 
     var OVERLAY_ALPHA = Math.floor(0.4*255);  // overlay transparency (on scale [0, 255])
     var INTENSITY_SCALE_STEP = 10;            // step size of particle intensity color scale
-    var MAX_PARTICLE_AGE = 100;               // max number of frames a particle is drawn before regeneration
-    var PARTICLE_LINE_WIDTH = 1.0;            // line width of a drawn particle
-    var PARTICLE_MULTIPLIER = 7;              // particle count scalar (completely arbitrary--this values looks nice)
+    var MAX_PARTICLE_AGE = 10;               // max number of frames a particle is drawn before regeneration
+    var PARTICLE_LINE_WIDTH = 0.5;            // line width of a drawn particle
+    var PARTICLE_MULTIPLIER = 1;              // particle count scalar (completely arbitrary--this values looks nice)
     var PARTICLE_REDUCTION = 0.75;            // reduce particle count to this much of normal for mobile devices
     var FRAME_RATE = 40;                      // desired milliseconds per frame
 
