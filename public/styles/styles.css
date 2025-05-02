@@ -244,6 +244,12 @@ body {
     fill: none;
 }
 
+.red-circle {
+    stroke: #ff3a3a;
+    stroke-width: 2.5;
+    fill: none;
+}
+
 /**************************************************************************************************
  * About Page
  **************************************************************************************************/
@@ -305,4 +311,17 @@ body {
 
 #closing {
     padding-bottom: 2.5rem;
+}
+
+.plane-marker {
+    pointer-events: none;  /* Allow clicks to pass through to the globe */
+    transform-origin: center;
+    transform: rotate(0deg);  /* You can adjust this to make the plane point in a specific direction */
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));  /* Add a subtle shadow for better visibility */
+    width: 30px;  /* Adjust size as needed */
+    height: 30px;  /* Adjust size as needed */
+    background-image: url('/plane.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }

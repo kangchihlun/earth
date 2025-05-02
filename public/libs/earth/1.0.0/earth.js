@@ -277,6 +277,47 @@
         }
     }
 
+
+    function drawRedCircle(globe) {
+        // Remove any existing red circle
+        d3.select(".red-circle").remove();
+        
+        // Convert coordinates to screen position
+        var coord = [120.84, 24.54]; // [longitude, latitude]
+        var point = globe.projection(coord);
+        
+        if (point) {
+            var path = d3.geo.path().projection(globe.projection).pointRadius(7);
+            var circle = d3.select("#foreground")
+                .append("path")
+                .attr("class", "red-circle")
+                .datum({type: "Point", coordinates: coord})
+                .attr("d", path);
+        }
+    }
+
+    function drawPlane(globe, coord, heading) {
+        // Remove any existing plane
+        d3.select(".plane-marker").remove();
+        
+        // Convert coordinates to screen position
+        var point = globe.projection(coord);
+
+        if (point) {
+            var path = d3.geo.path().projection(globe.projection).pointRadius(7);
+            var plane = d3.select("#foreground")
+                .append("image")
+                .attr("class", "plane-marker")
+                .attr("xlink:href", "/plane.png")
+                .attr("width", 20)  // Adjust size as needed
+                .attr("height", 20) // Adjust size as needed
+                .attr("x", point[0] - 10) // Center the plane on the point
+                .attr("y", point[1] - 10)
+                .attr("preserveAspectRatio", "xMidYMid meet"); // Maintain aspect ratio
+        }
+    }
+    
+
     function buildRenderer(mesh, globe) {
         if (!mesh || !globe) return null;
 
@@ -322,12 +363,17 @@
             drawLocationMark(activeLocation.point, activeLocation.coord);
         }
 
+        drawRedCircle(globe);
+        drawPlane(globe, [120.84, 24.54], 100);
+
         // Throttled draw method helps with slow devices that would get overwhelmed by too many redraw events.
         var REDRAW_WAIT = 5;  // milliseconds
         var doDraw_throttled = _.throttle(doDraw, REDRAW_WAIT, {leading: false});
 
         function doDraw() {
             d3.selectAll("path").attr("d", path);
+            // Update plane position on every move
+            drawPlane(globe, [120.84, 24.54], 100);
             rendererAgent.trigger("redraw");
             doDraw_throttled = _.throttle(doDraw, REDRAW_WAIT, {leading: false});
         }
